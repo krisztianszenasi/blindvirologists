@@ -1,6 +1,8 @@
 package test.com.teamalfa.blindvirologists;
 
 import main.com.teamalfa.blindvirologists.Virologist;
+import main.com.teamalfa.blindvirologists.agents.geneticCodes.DanceCode;
+import main.com.teamalfa.blindvirologists.agents.geneticCodes.ParalyzeCode;
 import main.com.teamalfa.blindvirologists.agents.viruses.DanceVirus;
 import main.com.teamalfa.blindvirologists.agents.viruses.ParalyzeVirus;
 import main.com.teamalfa.blindvirologists.city.fields.Field;
@@ -23,23 +25,26 @@ class VirologistMoveTest {
         // create virologist
         virologist = new Virologist();
 
-        // create field and its neighbours
+        // create current field and its neighbours
         current = new Field();
-        current.accept(virologist);
-        virologist.setField(current);
         ArrayList<Field> neighbours = new ArrayList<>();
-        for(int i = 0; i < 5; i++)
+        for(int i = 0; i < 5; i++) {
             neighbours.add(new Field());
+        }
         current.setNeighbours(neighbours);
 
-        // create viruses
-        paralyzeVirus = new ParalyzeVirus();
-        danceVirus = new DanceVirus();
+        // create viruses which affect movement
+        paralyzeVirus = new ParalyzeCode().createVirus();
+        danceVirus = new DanceCode().createVirus();
     }
 
     @BeforeEach
-    void resetVirologist(){
-        virologist.move(current);
+    void resetConditions(){
+        for(Field field : current.getNeighbours()) {
+            field.remove(virologist);
+        }
+        current.accept(virologist);
+        virologist.setField(current);
         virologist.removeViruses();
     }
 
@@ -49,9 +54,12 @@ class VirologistMoveTest {
         Field destination = current.getNeighbours().get(1);
         virologist.move(destination);
 
-        assertEquals(virologist.getField(), destination);
-        assertFalse(current.getVirologists().contains(virologist));
-        assertTrue(destination.getVirologists().contains(virologist));
+        assertEquals(virologist.getField(), destination,
+                "Virologist should move to its destination.");
+        assertFalse(current.getVirologists().contains(virologist),
+                "Current field should no longer contain the virologist.");
+        assertTrue(destination.getVirologists().contains(virologist),
+                "Destination field should contain the virologist.");
     }
 
     @Test
@@ -61,9 +69,12 @@ class VirologistMoveTest {
         paralyzeVirus.applyTo(virologist);
         virologist.move(destination);
 
-        assertEquals(virologist.getField(), current);
-        assertTrue(current.getVirologists().contains(virologist));
-        assertFalse(destination.getVirologists().contains(virologist));
+        assertEquals(virologist.getField(), current,
+                "Virologist should stay put because of the paralyze virus");
+        assertTrue(current.getVirologists().contains(virologist),
+                "Current field should still contain the virologist.");
+        assertFalse(destination.getVirologists().contains(virologist),
+                "Destination should not contain the virologist.");
     }
 
     @Test
@@ -81,7 +92,7 @@ class VirologistMoveTest {
                 randomDestCounter++;
 
             // check if landed somewhere other than current
-            assertFalse(destination == current);
+            assertNotEquals(destination, current, "Virologist should move to one of its neighbours.");
 
             // reset to current field
             virologist.getField().getVirologists().remove(virologist);
@@ -89,7 +100,8 @@ class VirologistMoveTest {
             current.getVirologists().add(virologist);
         }
 
-        assertTrue(randomDestCounter > 0);
+        assertTrue(randomDestCounter > 0,
+                "Virologist should have moved to a random field at least once.");
     }
 
     @Test
@@ -101,9 +113,14 @@ class VirologistMoveTest {
 
         virologist.move(destination);
 
-        assertEquals(virologist.getField(), current);
-        assertTrue(current.getVirologists().contains(virologist));
-        assertFalse(destination.getVirologists().contains(virologist));
+        assertEquals(virologist.getField(), current,
+                "Virologist should not move because the ParalyzeVirus has higher priority than the DanceVirus.");
+        assertTrue(current.getVirologists().contains(virologist),
+                "Virologist should not leave the current field," +
+                        "the ParalyzeVirus has higher priority than the DanceVirus.");
+        assertFalse(destination.getVirologists().contains(virologist),
+                "Virologist should not leave the current field, " +
+                        "the ParalyzeVirus has higher priority than the DanceVirus.");
     }
 
 }

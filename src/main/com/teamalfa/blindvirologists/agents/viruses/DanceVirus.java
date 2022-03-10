@@ -1,5 +1,6 @@
 package main.com.teamalfa.blindvirologists.agents.viruses;
 
+import main.com.teamalfa.blindvirologists.agents.geneticCodes.GeneticCode;
 import main.com.teamalfa.blindvirologists.city.fields.Field;
 
 import java.util.ArrayList;
@@ -7,7 +8,8 @@ import java.util.Random;
 
 public class DanceVirus extends Virus {
 
-    public DanceVirus(){
+    public DanceVirus(GeneticCode code){
+        super(code);
         priority = 1;
     }
 

@@ -15,7 +15,9 @@ public class Field {
     }
 
     public void accept(Virologist virologist) {
-        virologists.add(virologist);
+        if(!virologists.contains(virologist)) {
+            virologists.add(virologist);
+        }
     }
 
     public void remove(Virologist virologist) {
