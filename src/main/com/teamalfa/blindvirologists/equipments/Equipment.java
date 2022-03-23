@@ -2,5 +2,7 @@ package main.com.teamalfa.blindvirologists.equipments;
 
 abstract public class Equipment {
 
-    abstract public boolean affectInfection();
+    public boolean affectInfection() {
+        return false;
+    }
 }
